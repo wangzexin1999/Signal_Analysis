@@ -16,6 +16,7 @@ from scipy.io import loadmat,savemat
 from PIL import Image
 import util
 import GetTemplateData
+from Monitor import Monitor
 ########################################################################################
 #########实时信号监测
 ###################################################################################
@@ -217,3 +218,9 @@ def monitor_signal_feature(Work_Condition, channelCode,path):
         strange['frequencyDomain'] = util.count_difference(frequent_mean,data_feature['frequencyDomain'])
         strange['simple'] = util.count_difference(simple_mean,data_feature['simple'])
         print(strange['timeDomain'])
+
+
+def monitor_frequencyDomain():
+
+    m = Monitor()
+    m.monitorFrequencyDomain()

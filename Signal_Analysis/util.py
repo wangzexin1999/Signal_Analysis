@@ -16,7 +16,7 @@ from PIL import Image
 
 #全局的路径
 global gl_source_path 
-gl_source_path = "C:/wangzexin/Graduation/Signal_Analysis"
+gl_source_path = "D:\学习\Libary\振动组\项目\Signal_Analysis\Signal_Analysis"
 
 
 ############redis操作########################################################

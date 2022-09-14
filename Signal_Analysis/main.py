@@ -75,3 +75,4 @@ if __name__ == '__main__':
     # thread_1.join()
     # thread_2.join()
     # thread_3.join()
+    MonitorSignal.monitor_frequencyDomain()
