@@ -223,4 +223,5 @@ def monitor_signal_feature(Work_Condition, channelCode,path):
 def monitor_frequencyDomain():
 
     m = Monitor()
-    m.monitorFrequencyDomain()
+    signal =  m.loadTimeDomainFromRedis(2)
+    util.timeDomain2STFT(signal,20000)

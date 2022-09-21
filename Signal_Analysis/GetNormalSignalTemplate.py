@@ -14,7 +14,7 @@ import threading
 from scipy.io import loadmat,savemat
 from PIL import Image
 import util
-
+from scipy.signal import stft
 ########################################################################################
 #########p获取模板
 ###################################################################################
@@ -254,3 +254,6 @@ def get_normal_feature_template(TemplateSize , workCondition, channelCode):
         print("模板样本记录完成，共{}组样本".format(TemplateSize))
 
     return dirname
+
+
+
