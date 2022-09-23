@@ -1,3 +1,5 @@
+import time
+
 import scipy.signal
 from pip import main
 import redis
@@ -14,7 +16,6 @@ import threading
 from scipy.io import loadmat, savemat
 from PIL import Image
 from scipy.signal import stft
-
 # 全局的路径
 global gl_source_path
 gl_source_path = "D:\学习\Libary\振动组\项目\Signal_Analysis\Signal_Analysis"
@@ -200,18 +201,29 @@ def feature_extra(timeDomainData, sampleRate=20000):
     reslut['simple'] = [efficient, rms]
     return reslut
 
-
-def saveImg(path:str,filename: str, data: np.ndarray) -> object:
+def saveImgWithplt(path:str, filename: str, data: np.ndarray) -> object:
     """
-    使用plt进行保存图片,路径不存在会创建文件夹
-
+    使用plt进行保存图片,路径不存在会创建文件夹,单线程专用，多线程会出现redis获取数据不完整的情况，问题待排查
     :param filename:
     :param data:
     """
-
     # 测试是否是plt影响了redis获取数据，并不是
-    pass
-    # if os.path.exists(path) == False:
-    #     os.makedirs(path)
-    # # plt.imsave(path+filename, data)
+    # time.sleep(1)
+    if os.path.exists(path) == False:
+        os.makedirs(path)
+    plt.imsave(path+filename, data)
     # np.save(path+filename,data)
+
+def saveImgWithnpy(path:str,filename:str,data:np.ndarray):
+    """
+    将二维数据（时频图）保存为npy格式，可以多线程
+
+    :param path:
+    :param filename:
+    :param data:
+    :return:
+    """
+    if os.path.exists(path) == False:
+        os.makedirs(path)
+    # plt.imsave(path+filename, data)
+    np.save(path+filename,data)

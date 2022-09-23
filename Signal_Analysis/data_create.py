@@ -40,6 +40,9 @@ for i in range (4):
         # random_start = np.random.randint(low=0, high=(all_lenght - 2 * 20000))
         dataListcos = signal[random_start:random_start + 20000]
         random_start+=20000
+        if len(dataListcos) != 20000:
+            print("点数不足20000，break")
+            break
         jsondata = {"5300rpm-320kw-1229":dataListcos}
         json_str = json.dumps(jsondata)
         channelCode = 'redisCollectionData-0-' + str(i)

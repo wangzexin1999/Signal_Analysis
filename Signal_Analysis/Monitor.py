@@ -28,22 +28,31 @@ class Monitor:
         self.fequeny = self.sampleLate * np.array(range(int(self.dataLen/2)))/self.dataLen
         self.allIndex = 4
 
-    def init(self,workCondition,channelIndex):
 
+    def init(self,workCondition,channelIndex,Class):
+        """
+        初始化一些额外的东西，但是必要
+
+        :param workCondition:
+        :param channelIndex:
+        :param Class: 故障信息
+        :return: None
+        """
         self.workCondition = workCondition
         self.channelIndex =channelIndex
-
+        self.Class = Class
     def loadTimeDomainFromRedis(self):
         """
         index为第几个通道，从0开始。该函数自动向redis的list阻塞型队尾取数据
-
         """
+        # 从非空队列尾部弹出数据，是RPOP的阻塞版，没有数据会等待
         data = self.redisConn.brpop(self.channels[self.channelIndex],self.blockingReadTimeout)
 
         if data is None:
             return None
-
-        jsonData = json.loads(data[1])  # 从非空队列尾部弹出数据，是RPOP的阻塞版，没有数据会等待
+        print("lenData:",len(data[1]))
+        jsonData = json.loads(data[1])
+        print("lenJsonData:",len(jsonData[self.workCondition]))
         timeSignal = jsonData[self.workCondition]
 
         return timeSignal
@@ -84,10 +93,10 @@ class Monitor:
             amp.append(currentAmp)
         print("数据分析完毕,redis为空")
 
-    def timeDomain2STFT(signal: np.ndarray, sampleRate: int):
+    def timeDomain2STFT(self,signal: np.ndarray, sampleRate: int):
         N = len(signal)
         f, t, Zxx = stft(signal, fs=sampleRate)
-        plt.pcolormesh(t, f, np.abs(Zxx), shading='gouraud')
+        plt.pcolormesh(t, f, np.abs(Zxx))
         plt.xlabel("Time")
         plt.ylabel("Frequency")
         plt.show()
@@ -106,28 +115,29 @@ class Monitor:
         """
         channelCode = self.channels[self.channelIndex]
         source_path = util.gl_source_path
-        path =  source_path +"/TemplateFile/{}/STFT/{}/".format(workCondition,channelCode)
-        filename = "Channel-{}_WorkCondition-{}index-{}.jpg".format(channelCode,workCondition,str(i))
+        path =  source_path +"/TemplateFile/{}/STFT/{}/{}/".format(workCondition,self.Class,channelCode)
+        filename = "WorkCondition-{}--index-{}.jpg".format(workCondition,str(i))
         if length != len(timesignal):
-            print("点数不足 {} 点".format(len))
+            print("点数不足 {} 点".format(len(timesignal)))
             return None
         if zxx is not None:
-            util.saveImg(path,filename,np.abs(zxx))
+            util.saveImgWithplt(path, filename, np.abs(zxx))
             return zxx
         f,t,Zxx = stft(timesignal,fs=samplerate)
-        util.saveImg(path,filename,np.abs(Zxx))
+        util.saveImgWithplt(path, filename, np.abs(Zxx))
         return Zxx
     def saveImgSTFTFromRedis(self,index):
         """
 
         :param index: 代表第几个redis数据
-        :return:
+        :return: None-如果redis为空的时候,True可以正确保存
         """
         signal = self.loadTimeDomainFromRedis()
         if signal is None:
             print("通道数据加载完毕,或者redis为空")
-        self.save_img_STFT(signal, i= index,workCondition=self.workCondition)
-
+            return None
+        if self.save_img_STFT(signal, i= index,workCondition=self.workCondition) is not None:
+            return True
 
     def saveImgSTFTWithNumber(self,number):
         """
@@ -136,3 +146,15 @@ class Monitor:
         """
         for i in range(number):
             self.saveImgSTFTFromRedis(i)
+
+    def saveImgSTFTUntilNoneFromRedis(self):
+        """
+        一直保存来自redis的数据，直到没有数据
+
+        :return:
+        """
+        i = 0
+        while True:
+            if self.saveImgSTFTFromRedis(i) is None:
+                return None
+            i += 1
