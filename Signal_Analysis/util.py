@@ -116,6 +116,130 @@ def FindMax3Puxian(ls):  # 快速获取list中最大的三个元素
     max3Index = ls.index(max3)
     return max1, max2, max3, max1Index, max2Index, max3Index
 
+def readfile(filename):    
+    dataNum = 0
+    data_max = 0
+    dataList = []
+    with open(filename,"r") as f:
+        for line in f.readlines():
+            linestr = line.strip('\n')
+            dataList.append(float(linestr))
+            dataNum += 1
+            if linestr >= str(data_max):
+                data_max = linestr
+            # if dataNum >=1024 :
+            #     break
+    return dataList, dataNum, data_max
+    
+def readfile_XJTU(filename):
+    dataNum = 0
+    dataList = []
+    with open(filename,"r") as f:
+        count = 1
+        for line in f.readlines():
+            if(count>=17):
+                linestr = line.split('\t')[1]
+                dataList.append(float(linestr))
+                dataNum += 1
+            count+=1   
+    return dataList, dataNum
+
+def capture(d_path):
+    """读取mat文件，返回字典
+
+    :param original_path: 读取路径
+    :return: 数据字典
+    """
+    filenames = os.listdir(d_path)
+    files = {}
+    for i in filenames:
+        # 文件路径
+        file_path = os.path.join(d_path, i)
+        # print(file_path)
+        file = loadmat(file_path)
+        # print(file)
+        file_keys = file.keys()
+        # print(file_keys)
+        for key in file_keys:
+            if 'DE' in key:
+                files[i] = file[key].ravel()
+    return files
+
+def capture_Ottawa(d_path):
+    """处理渥太华数据集
+
+    :param original_path: 读取路径
+    :return: 数据字典
+    """
+    filenames = os.listdir(d_path)
+    files_channel1 = {}
+    files_channel2 = {}
+    for i in filenames:
+        # 文件路径
+        file_path = os.path.join(d_path, i)
+        # print(file_path)
+        file = loadmat(file_path)
+        # print(file)
+        file_keys = file.keys()
+        # print(file_keys)
+        for key in file_keys:
+            if 'Channel_1' in key:
+                files_channel1[i] = file[key].ravel()
+            if 'Channel_1' in key:
+                files_channel2[i] = file[key].ravel()
+    return files_channel1,files_channel2
+
+# 将一维数组的元素归一化到0-255之间
+def normalization_255(array):
+    ymax = 255
+    ymin = 0
+    xmax = max(array)
+    xmin = min(array)
+    if xmax == xmin:
+        return array
+    for i in range(len(array)):
+        array[i] = round(((ymax - ymin) * (array[i] - xmin) / (xmax - xmin)) + ymin)
+    return array
+
+def GetFrequencyFeature4(wavsignal, fs):
+    # wav波形 加时间窗以及时移10ms
+    time_window = 25  # 单位ms
+    time_shift = 10  # 帧移ms
+
+    window_length = int(fs / 1000 * time_window)  # 计算窗长度的公式，目前全部为400固定值
+    frame_shift = int(fs / 1000 * time_shift)  # 计算帧移的公式，目前全部为400固定值
+
+    wav_arr = np.array(wavsignal)
+    # wav_length = len(wavsignal[0])
+    wav_length = len(wavsignal)
+
+    range0_end = int(len(wavsignal) / fs * 1000 - time_window) // time_shift + 1  # 计算循环终止的位置，也就是最终生成的窗数
+    data_input = np.zeros((range0_end, int(window_length // 2)), dtype=np.float64)  # 用于存放最终的频率特征数据
+
+    data_line = np.zeros((1, window_length), dtype=np.float64)
+    # 生成汉明窗
+    x = np.linspace(0, window_length - 1, window_length, dtype=np.int64)
+    w = 0.54 - 0.46 * np.cos(2 * np.pi * (x) / (window_length - 1))  # 汉明窗
+
+    for i in range(0, range0_end):
+        p_start = i * frame_shift
+        p_end = p_start + window_length
+
+        data_line = wav_arr[p_start:p_end]
+        data_line.dtype = np.double
+        # 生成随机数
+        # snr = random.randint(-9, 9)
+        # data_line = Gnoisegen(data_line,snr)
+        data_line = data_line * w  # 加窗
+        data_line = np.abs(fft(data_line)) / wav_length
+        data_line = normalization_255(data_line)
+        data_input[i] = data_line[0: window_length // 2]  # 设置为400除以2的值（即200）是取一半数据，因为是对称的
+
+    # print(data_input.shape)
+    data_input = np.log(data_input + 1)
+    data_input = np.array(data_input)
+    data_input = data_input.transpose()
+    return data_input
 
 #######################计算总值#############################################
 def TotalValue(single_data):
@@ -210,8 +334,9 @@ def saveImg(path:str,filename: str, data: np.ndarray) -> object:
     """
 
     # 测试是否是plt影响了redis获取数据，并不是
-    pass
-    # if os.path.exists(path) == False:
-    #     os.makedirs(path)
-    # # plt.imsave(path+filename, data)
-    # np.save(path+filename,data)
+    # pass
+    if os.path.exists(path) == False:
+        os.makedirs(path)
+    # plt.imsave(path+filename, data)
+    np.save(path+filename,data)
+
