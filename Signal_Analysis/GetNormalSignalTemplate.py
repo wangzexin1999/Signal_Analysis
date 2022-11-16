@@ -211,27 +211,27 @@ def GetNormalNondimensionalFrequencyDomainSignalTemplate(TemplateSize , workCond
 
     return dirname
 
-#######################获取特征值信息模板-2022-0909#######################################
-def get_normal_feature_template(TemplateSize , workCondition, channelCode):
-    template_name = 'signal_feature'
-    isExist , dirname = util.make_dir(template_name,workCondition , channelCode)
-    if(isExist == False):
-        r = util.RedisConnect(6379,'localhost')
-        for i in range(TemplateSize):
-            # every_data = json.loads(r.blpop("redisCollectionData-"+ channelCode)[1])['redisCollectionData']
-            every_data_all = json.loads(r.blpop("redisCollectionData-"+ channelCode)[1])
-            data_workCondition = list(every_data_all.keys())[0]#工况信息
-            print("当前记录的模板数据为工况：{}---通道：{}".format(workCondition,channelCode))
-            every_data = np.array(every_data_all[data_workCondition])
-            signal_feature = util.feature_extra(every_data)
-            with open(source_path +"/TemplateFile/{}/{}/{}/Channel-{}_WorkCondition-{}_TemplateNum-{}.json".format(workCondition,template_name,channelCode,channelCode,workCondition,str(i)),"w") as f:
-                json.dump(signal_feature,f)
-                f.close()
-            print("已记录的模板样本量: {}".format(i+1))
+# #######################获取特征值信息模板-2022-0909#######################################
+# def get_normal_feature_template(TemplateSize , workCondition, channelCode):
+#     template_name = 'signal_feature'
+#     isExist , dirname = util.make_dir(template_name,workCondition , channelCode)
+#     if(isExist == False):
+#         r = util.RedisConnect(6379,'localhost')
+#         for i in range(TemplateSize):
+#             # every_data = json.loads(r.blpop("redisCollectionData-"+ channelCode)[1])['redisCollectionData']
+#             every_data_all = json.loads(r.blpop("redisCollectionData-"+ channelCode)[1])
+#             data_workCondition = list(every_data_all.keys())[0]#工况信息
+#             print("当前记录的模板数据为工况：{}---通道：{}".format(workCondition,channelCode))
+#             every_data = np.array(every_data_all[data_workCondition])
+#             signal_feature = util.feature_extra(every_data)
+#             with open(source_path +"/TemplateFile/{}/{}/{}/Channel-{}_WorkCondition-{}_TemplateNum-{}.json".format(workCondition,template_name,channelCode,channelCode,workCondition,str(i)),"w") as f:
+#                 json.dump(signal_feature,f)
+#                 f.close()
+#             print("已记录的模板样本量: {}".format(i+1))
         
-        print("模板样本记录完成，共{}组样本".format(TemplateSize))
+#         print("模板样本记录完成，共{}组样本".format(TemplateSize))
 
-    return dirname
+#     return dirname
 
 #######################获取特征值信息模板-2022-0909#######################################
 def get_normal_feature_template(TemplateSize , workCondition, channelCode):

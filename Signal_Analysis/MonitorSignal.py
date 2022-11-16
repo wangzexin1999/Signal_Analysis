@@ -17,6 +17,7 @@ from PIL import Image
 import util
 import GetTemplateData
 from Monitor import Monitor
+import time
 ########################################################################################
 #########实时信号监测
 ###################################################################################
@@ -205,9 +206,12 @@ def MonitorNondimentionalFrequencyDomainSignal(Work_Condition, channelCode,path)
 def monitor_signal_feature(Work_Condition, channelCode,path):
     r = util.RedisConnect(6379,'localhost')
     time_mean,frequent_mean,simple_mean = GetTemplateData.get_feature_template_data(path)
+    
+
     signal_num = 1
     while(True):
         # every_data = json.loads(r.brpop("redisCollectionData-"+ channelCode)[1])['redisCollectionData']
+
         every_data_all = json.loads(r.brpop("redisCollectionData-"+ channelCode)[1])
         data_workCondition = list(every_data_all.keys())[0]#工况信息
         print("当前为特征值监测-工况：{}-通道：{}".format(Work_Condition,channelCode))
@@ -217,7 +221,15 @@ def monitor_signal_feature(Work_Condition, channelCode,path):
         strange['timeDomain'] = util.count_difference(time_mean,data_feature['timeDomain'])
         strange['frequencyDomain'] = util.count_difference(frequent_mean,data_feature['frequencyDomain'])
         strange['simple'] = util.count_difference(simple_mean,data_feature['simple'])
-        print(strange['timeDomain'])
+        if(strange['timeDomain'] == []):
+            r.lpush(("AnalysisResult-" + channelCode),"0");
+        else:
+            r.lpush(("AnalysisResult-" + channelCode),"1");
+        
+
+        # print(strange['timeDomain'])
+        # time.sleep(500)
+            
 
 
 def monitor_frequencyDomain():

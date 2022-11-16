@@ -16,7 +16,7 @@ from PIL import Image
 
 #全局的路径
 global gl_source_path 
-gl_source_path = "D:\学习\Libary\振动组\项目\Signal_Analysis\Signal_Analysis"
+gl_source_path = "D:\QT_backward\Signal_Analysis\qt"
 
 
 ############redis操作########################################################
@@ -136,9 +136,9 @@ def count_difference(template,real):
     N= len(template)
     strange = []
     for i in range(N):
-        if(abs(template[i] - real[i])/template[i]>0.2):
+        if(abs(template[i] - real[i])/template[i]>0.85):
             strange.append(i)
-    
+        # print(abs(template[i] - real[i])/template[i])
     return strange
 
 #######################获取时域-频域信息-江德宏#############################################
