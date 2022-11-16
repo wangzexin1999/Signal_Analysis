@@ -235,7 +235,7 @@ def GetNormalNondimensionalFrequencyDomainSignalTemplate(TemplateSize , workCond
 
 #######################获取特征值信息模板-2022-0909#######################################
 def get_normal_feature_template(TemplateSize , workCondition, channelCode):
-    template_name = 'signal_feature'
+    template_name = 'signal_feature_normal'
     isExist , dirname = util.make_dir(template_name,workCondition , channelCode)
     if(isExist == False):
         r = util.RedisConnect(6379,'localhost')
