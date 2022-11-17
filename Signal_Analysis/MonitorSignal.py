@@ -208,7 +208,7 @@ def monitor_signal_feature(Work_Condition, channelCode,path):
     time_mean,frequent_mean,simple_mean = GetTemplateData.get_feature_template_data(path)
     
 
-    signal_num = 1
+    signal_num = 0
     while(True):
         # every_data = json.loads(r.brpop("redisCollectionData-"+ channelCode)[1])['redisCollectionData']
 
@@ -222,9 +222,11 @@ def monitor_signal_feature(Work_Condition, channelCode,path):
         strange['frequencyDomain'] = util.count_difference(frequent_mean,data_feature['frequencyDomain'])
         strange['simple'] = util.count_difference(simple_mean,data_feature['simple'])
         if(strange['timeDomain'] == []):
-            r.lpush(("AnalysisResult-" + channelCode),"0");
+            r.lpush(("AnalysisResult-" + channelCode),("type-0_channel-"+channelCode+"_signalId-"+signal_num));
         else:
-            r.lpush(("AnalysisResult-" + channelCode),"1");
+            r.lpush(("AnalysisResult-" + channelCode),("type-1_channel-"+channelCode+"_signalId-"+signal_num));
+
+        signal_num += 1
         
 
         # print(strange['timeDomain'])
