@@ -16,7 +16,7 @@ from PIL import Image
 
 #全局的路径
 global gl_source_path 
-gl_source_path = "D:\QT_backward\Signal_Analysis\qt"
+gl_source_path = "D:\QT_backward\Signal_Analysis\wangzexin"
 
 
 ############redis操作########################################################
@@ -139,6 +139,7 @@ def count_difference(template,real):
         if(abs(template[i] - real[i])/template[i]>0.85):
             strange.append(i)
         # print(abs(template[i] - real[i])/template[i])
+    print(strange)
     return strange
 
 #######################获取时域-频域信息-江德宏#############################################
